@@ -41,11 +41,10 @@ function noSearchDefaultPageRender() {
         </div>
       </div>
       <footer class="footer">
-        <a href="https://t3.chat" target="_blank">made with ❤️ by</a>
+        <p>made with ❤️ by</p>
+        <a href="https://github.com/GabrielSantos23" target="_blank">gabs</a>
         •
-        <a href="https://x.com/theo" target="_blank">gabs</a>
-        •
-        <a href="https://github.com/t3dotgg/unduck" target="_blank">github</a>
+        <a href="https://github.com/GabrielSantos23/Banggs" target="_blank">github</a>
       </footer>
     </div>
   `;
