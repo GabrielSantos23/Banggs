@@ -40,6 +40,15 @@ const hashbang: {
 		t: "tiktok",
 		u: "https://www.tiktok.com/search?q={{{s}}}",
 	},
+	chatgpt: {
+		c: "AI",
+		d: "chatgpt.com",
+		r: 0,
+		s: "ChatGPT",
+		sc: "AI",
+		t: "gpt",
+		u: "https://chat.openai.com/?model=gpt-4&q={{{s}}}",
+	},
 };
 for (const bang of rawBangs) hashbang[bang.t] = bang;
 
