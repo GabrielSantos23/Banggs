@@ -1,4 +1,11 @@
-import { bangs as coreBangs } from "./bang";
+import { bangs as coreBangs } from "./bangs/hashbang.ts";
+import {
+  CONSTANTS,
+  storage,
+  addToSearchHistory,
+  getSearchHistory,
+  clearSearchHistory,
+} from "./libs";
 import "./global.css";
 import { initTheme, toggleTheme } from "./theme";
 
@@ -19,7 +26,7 @@ function noSearchDefaultPageRender() {
         </button>
       </div>
       <div class="content-container">
-        <h1 style="" >Bangss.xyz</h1>
+        <h1 style="" >Bangg.xyz</h1>
         <p>DuckDuckGo's bang redirects are too slow. Add the following URL as a custom search engine to your browser. Enables <a href="https://duckduckgo.com/bang.html" target="_blank">all of DuckDuckGo's bangs.</a></p>
         <div class="url-container"> 
           <input 
@@ -300,12 +307,45 @@ function noSearchDefaultPageRender() {
       )
       .forEach((el) => (el.value = ""));
     alert("Custom bang added!");
+
+    /* ------------------------------------------------------------------ */
+    /* Search history toggle + clear logic                                */
+    /* ------------------------------------------------------------------ */
+
+    const historyToggleInput =
+      modal.querySelector<HTMLInputElement>(".switch-input")!;
+    historyToggleInput.checked =
+      localStorage.getItem(CONSTANTS.LOCAL_STORAGE_KEYS.HISTORY_ENABLED) ===
+      "true";
+
+    historyToggleInput.addEventListener("change", () => {
+      localStorage.setItem(
+        CONSTANTS.LOCAL_STORAGE_KEYS.HISTORY_ENABLED,
+        historyToggleInput.checked.toString()
+      );
+    });
+
+    const clearHistoryBtn = Array.from(
+      modal.querySelectorAll<HTMLButtonElement>(".primary")
+    ).find((btn) => btn.textContent?.trim().toLowerCase() === "clear history");
+
+    clearHistoryBtn?.addEventListener("click", () => {
+      clearSearchHistory();
+      alert("Search history cleared.");
+    });
   });
 }
 
 function getCustomBangs() {
   try {
-    return JSON.parse(localStorage.getItem("custom-bangs") ?? "[]");
+    const raw = localStorage.getItem("custom-bangs");
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    // Older format (object keyed by shortcut)
+    if (!Array.isArray(parsed) && typeof parsed === "object") {
+      return Object.values(parsed);
+    }
+    return parsed as any[];
   } catch {
     return [] as any[];
   }
@@ -316,21 +356,23 @@ function saveCustomBangs(b: any[]) {
 }
 
 export function getAllBangs() {
-  return [...getCustomBangs(), ...coreBangs];
+  return [...getCustomBangs(), ...Object.values(coreBangs)];
 }
 
 const LS_DEFAULT_BANG = localStorage.getItem("default-bang") ?? "g";
 
 type Bang = { t: string; u: string; d: string; n?: string };
 
-let bangMap = new Map<string, Bang>(
-  coreBangs.map((b) => [b.t, b] as [string, Bang])
-);
+const coreBangList = Object.values(coreBangs).filter(Boolean) as Bang[];
+
+let bangMap = new Map<string, Bang>(coreBangList.map((b) => [b.t, b]));
 
 function rebuildBangMap() {
-  bangMap = new Map<string, Bang>(
-    [...coreBangs, ...getCustomBangs()].map((b) => [b.t, b] as [string, Bang])
-  );
+  const list = [...Object.values(coreBangs), ...getCustomBangs()].filter(
+    Boolean
+  ) as Bang[];
+
+  bangMap = new Map<string, Bang>(list.map((b) => [b.t, b]));
 }
 
 // Build initial map with custom bangs (if any)
@@ -370,6 +412,19 @@ function getBangredirectUrl() {
     encodeURIComponent(cleanQuery).replace(/%2F/g, "/")
   );
   if (!searchUrl) return null;
+
+  // Record search in history if user has enabled it
+  if (
+    localStorage.getItem(CONSTANTS.LOCAL_STORAGE_KEYS.HISTORY_ENABLED) ===
+      "true" &&
+    cleanQuery !== ""
+  ) {
+    addToSearchHistory(cleanQuery, {
+      bang: selectedBang?.t ?? "",
+      name: selectedBang?.n ?? selectedBang?.t ?? "",
+      url: selectedBang?.u ?? "",
+    });
+  }
 
   return searchUrl;
 }
