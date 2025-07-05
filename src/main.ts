@@ -315,7 +315,7 @@ function saveCustomBangs(b: any[]) {
   localStorage.setItem("custom-bangs", JSON.stringify(b));
 }
 
-function getAllBangs() {
+export function getAllBangs() {
   return [...getCustomBangs(), ...coreBangs];
 }
 
@@ -403,3 +403,5 @@ function renderSearchCounter() {
   }
   el.textContent = `search: ${getSearchCount()}`;
 }
+
+renderSearchCounter();
