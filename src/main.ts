@@ -106,6 +106,7 @@ function noSearchDefaultPageRender() {
           <label for="default-bang">Default Bang</label>
           <input id="default-bang" type="text" placeholder="g" value="${LS_DEFAULT_BANG}" />
           <small>The best way to add new bangs is by submitting them on <a href="https://duckduckgo.com/bang.html" class="inline-link" target="_blank" rel="noopener">DuckDuckGo</a>.</small>
+          <button id="view-bangs-btn" class="primary" style="margin-top:8px;">View My Bangs</button>
         </div>
 
         <div class="settings-section">
@@ -258,6 +259,11 @@ function noSearchDefaultPageRender() {
     currentDefaultBang = findBangByTag(val) ?? currentDefaultBang;
   });
 
+  // Open bangs list directly from settings
+  const viewBangsBtn =
+    modal.querySelector<HTMLButtonElement>("#view-bangs-btn");
+  viewBangsBtn?.addEventListener("click", openBangsModal);
+
   // Add bang handler
   const addBangBtn = modal.querySelector<HTMLButtonElement>("#add-bang-btn")!;
   addBangBtn.addEventListener("click", () => {
@@ -293,13 +299,24 @@ function noSearchDefaultPageRender() {
     rebuildBangMap();
     renderBangsList();
 
-    // Clear inputs & feedback
+    // Clear input fields
     modal
       .querySelectorAll<HTMLInputElement>(
         "#cb-name, #cb-shortcut, #cb-url, #cb-domain"
       )
       .forEach((el) => (el.value = ""));
-    alert("Custom bang added!");
+
+    // Provide lightweight in-modal feedback instead of blocking alert()
+    let feedback = modal.querySelector<HTMLDivElement>("#add-bang-feedback");
+    if (!feedback) {
+      feedback = document.createElement("div");
+      feedback.id = "add-bang-feedback";
+      feedback.style.cssText =
+        "color: #28a745; font-size: 13px; margin-top: 4px; text-align: center;";
+      addBangBtn.insertAdjacentElement("afterend", feedback);
+    }
+    feedback.textContent = "Custom bang added!";
+    setTimeout(() => (feedback!.textContent = ""), 2500);
 
     /* ------------------------------------------------------------------ */
     /* Search history toggle + clear logic                                */
@@ -327,6 +344,9 @@ function noSearchDefaultPageRender() {
       alert("Search history cleared.");
     });
   });
+
+  // Ensure the persistent search-counter is rendered when landing on the homepage
+  renderSearchCounter();
 }
 
 function getCustomBangs() {
@@ -449,7 +469,5 @@ function renderSearchCounter() {
     el.className = "search-counter";
     document.body.appendChild(el);
   }
-  // el.textContent = `search: ${getSearchCount()}`;
+  el.textContent = `search: ${getSearchCount()}`;
 }
-
-renderSearchCounter();
