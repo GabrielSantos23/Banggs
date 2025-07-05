@@ -1,6 +1,40 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
+    <script>
+      // Fast-path redirect before bundle loads
+      (function () {
+        const core = {
+          g: "https://www.google.com/search?q={s}",
+          yt: "https://www.youtube.com/results?search_query={s}",
+          ddg: "https://duckduckgo.com/?q={s}",
+          b: "https://www.bing.com/search?q={s}",
+          tw: "https://twitter.com/search?q={s}",
+          gh: "https://github.com/search?q={s}",
+          r: "https://www.reddit.com/search/?q={s}",
+        };
+        const url = new URL(window.location.href);
+        const qRaw = (url.searchParams.get("q") || "").trim();
+        if (!qRaw) return; // no query
+        const match = qRaw.match(/^!(\S+)/);
+        if (!match) return;
+        const tag = match[1].toLowerCase();
+        const tpl = core[tag];
+        if (!tpl) return; // not fast-path tag
+        const clean = qRaw.replace(/^!\S+\s*/, "").trim();
+        const dest = clean
+          ? tpl.replace("{s}", encodeURIComponent(clean).replace(/%2F/g, "/"))
+          : `https://${tpl.match(/https?:\/\/([^/]+)/)[1]}`;
+        window.location.replace(dest);
+      })();
+    </script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/sw.js").catch(() => {});
+        });
+      }
+    </script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/search.svg" />
     <link
@@ -36,7 +70,7 @@
       content="A better default search engine (with bangs!)"
     />
   </head>
-  <body style="background-color: transparent">
+  <body>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
