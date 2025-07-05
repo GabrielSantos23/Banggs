@@ -1,11 +1,5 @@
-import { bangs as coreBangs } from "./bangs/hashbang.ts";
-import {
-  CONSTANTS,
-  storage,
-  addToSearchHistory,
-  getSearchHistory,
-  clearSearchHistory,
-} from "./libs";
+import { bangs as coreBangs } from "./bangs/core";
+import { CONSTANTS, addToSearchHistory, clearSearchHistory } from "./libs";
 import "./global.css";
 import { initTheme, toggleTheme } from "./theme";
 
