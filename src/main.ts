@@ -98,7 +98,7 @@ function noSearchDefaultPageRender() {
         <button class="close-btn" aria-label="Close">&times;</button>
         <div class="settings-section">
           <h2>Settings</h2>
-          <p>Personalize your Und*ck experience.</p>
+          <p>Personalize your Bangss.xyz experience.</p>
         </div>
 
         <div class="settings-section">
@@ -401,7 +401,7 @@ function renderSearchCounter() {
     el.className = "search-counter";
     document.body.appendChild(el);
   }
-  el.textContent = `search: ${getSearchCount()}`;
+  // el.textContent = `search: ${getSearchCount()}`;
 }
 
 renderSearchCounter();
